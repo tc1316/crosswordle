@@ -2,6 +2,30 @@ import React, { useRef, useEffect, useState } from "react";
 import Letter from "./Letter.js";
 import "./LetterBucket.css";
 
+function dictionaryGenerator(answer) {
+  let letterCounts = {};
+  answer.forEach(function (x) {
+    letterCounts[x] = (letterCounts[x] || 0) + 1;
+  });
+  Object.entries(letterCounts).map(([key, value]) => {
+    letterCounts[key] = { count: value, green: 0, yellow: 0 };
+    return letterCounts;
+  });
+  return letterCounts;
+}
+
+function backgroundColour(lettersArr, letterDictionary) {
+  let newLetterDictionary = { ...letterDictionary };
+  for (let i = 0; i < 25; ++i) {
+    let letter = lettersArr[i].value;
+    if (letter !== "" && letter in newLetterDictionary) {
+      let state = lettersArr[i].state;
+      if (state === "correct") newLetterDictionary[letter].green += 1;
+      if (state === "wrong-location") newLetterDictionary[letter].yellow += 1;
+    }
+  }
+}
+
 function randomiseAnswer(answer) {
   let arr = answer.slice();
   for (let i = 0; i < arr.length - 1; ++i) {
@@ -11,19 +35,6 @@ function randomiseAnswer(answer) {
     arr[j] = current_element;
   }
   return arr;
-}
-
-function dictionaryGenerator(answer) {
-  let counts = {};
-  answer.forEach(function (x) {
-    counts[x] = (counts[x] || 0) + 1;
-  });
-  Object.keys(counts).map((key, _) => {
-    let count = counts[key];
-    counts[key] = { count: count, green: 0, yellow: 0 };
-    return counts;
-  });
-  return counts;
 }
 
 function lettersArr(answer) {
@@ -40,18 +51,6 @@ function formatLetters(postCheckGrid) {
     });
   });
   return lettersArr;
-}
-
-function backgroundColour(lettersArr, letterDictionary) {
-  let newLetterDictionary = { ...letterDictionary };
-  for (let i = 0; i < 25; ++i) {
-    let letter = lettersArr[i].value;
-    if (letter !== "" && letter in newLetterDictionary) {
-      let state = lettersArr[i].state;
-      if (state === "correct") newLetterDictionary[letter].green += 1;
-      if (state === "wrong-location") newLetterDictionary[letter].yellow += 1;
-    }
-  }
 }
 
 function keyRowLength(uniqueLetters) {
@@ -83,7 +82,7 @@ export default function LetterBucket({ answer, postCheckGrid }) {
       backgroundColour(newLettersArr, newLetterDictionary);
     }
     updateBackgroundColours();
-  }, [postCheckGrid]);
+  }, [postCheckGrid, answer]);
 
   return (
     <>
